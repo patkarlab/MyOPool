@@ -10,8 +10,8 @@ outfile = args[2]
 vartools=['MuTect2 | ', 'VarDict | ', 'LoFreq | ', 'Strelka | ', 'Freebayes | ', 'Platypus | ', 'DeepSomatic | ']
 
 df = pd.read_csv(filename)
-x = df['Otherinfo1']
-discarded_column=df.columns.get_loc('Otherinfo2')
+x = df['Otherinfo']
+discarded_column=df.columns.get_loc('Otherinfo')
 data = dict()
 somatic_cols=['Chr','Start','End','Ref','Alt','Variant_Callers','FILTER','SOMATIC_FLAG','VariantCaller_Count','REF_COUNT','ALT_COUNT','VAF','Func.refGene','Gene.refGene','ExonicFunc.refGene','AAChange.refGene','Gene_full_name.refGene','Function_description.refGene','Disease_description.refGene','cosmic84','PopFreqMax','1000G_ALL','ExAC_ALL','CG46','ESP6500siv2_ALL','InterVar_automated']
 data.setdefault('FILTER', [])
@@ -56,4 +56,4 @@ horizontal_stack['cosmic84']=horizontal_stack['cosmic84'].astype(str).str.replac
 horizontal_stack['AAChange.refGene']=horizontal_stack['AAChange.refGene'].str.replace(',' , ';')
 horizontal_stack.replace(to_replace='.', value='-1', inplace=True)
 horizontal_stack=horizontal_stack.reindex(columns = somatic_cols)
-horizontal_stack.to_csv(outfile, index=False)
+horizontal_stack.to_csv(outfile, index=False, header=False)

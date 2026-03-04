@@ -6,10 +6,10 @@ include { TRIM; MAPBAM; MARK_DUPS; BQSR; APPLY_BQSR; ALIGNMENT_METRICS; ALIGNMEN
 adapters = file("${params.adapters}", checkIfExists: true )
 genome_loc = file("${params.genome}", checkIfExists: true)
 index_files = file("${params.genome_dir}/${params.ind_files}.*")
-known_SNPs = file("${params.site1}", checkIfExists: true)
-known_SNPs_index = file("${params.site1_idx}", checkIfExists: true)
-known_INDELS = file("${params.site2}", checkIfExists: true)
-known_INDELS_index = file("${params.site2_idx}", checkIfExists: true)
+known_SNPs = file("${params.site2}", checkIfExists: true)
+known_SNPs_index = file("${params.site2_idx}", checkIfExists: true)
+known_INDELS = file("${params.site1}", checkIfExists: true)
+known_INDELS_index = file("${params.site1_idx}", checkIfExists: true)
 
 workflow FASTQTOBAM {
 	take:

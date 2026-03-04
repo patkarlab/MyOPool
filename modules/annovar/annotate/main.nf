@@ -1,6 +1,6 @@
 process ANNOVAR {
 	tag "${Sample}"
-	label 'process_low'
+	label 'process_inter'
 	input:
 		tuple val (Sample), path(Vcf)
 		val(variant_caller)

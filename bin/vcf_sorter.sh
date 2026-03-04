@@ -1,4 +1,4 @@
-#!/usr/bin/bash 
+#!/bin/bash 
 
 infile=$1
 outfile=$2
