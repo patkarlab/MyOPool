@@ -61,7 +61,7 @@ workflow MyoPool {
 			tuple(sample_full, sample_base, r1, r2)
 		}
 		.branch {
-			myopool: it[0].toLowerCase().contains("myopool") || it[0].toLowerCase().contains("screl")
+			myopool: it[0].toLowerCase().contains("myopool") || it[0].toLowerCase().contains("screl") || it[0].toLowerCase().contains("cnv")
 			wgs:     it[0].contains("WGS")
 		}
 

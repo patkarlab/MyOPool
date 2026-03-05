@@ -75,3 +75,12 @@ nextflow -c /home/pipelines/NextSeq_mutation_detector_leukemia/nextflow.config r
 --gene_scatter /home/pipelines/MMpanel/scripts/gene_scatter \
 -profile docker -resume -bg
 conda deactivate
+
+# CNV Validation 20260304
+#source activate new_base
+#nextflow -c /home/pipelines/NextSeq_mutation_detector_leukemia/nextflow.config run main.nf -entry MyoPool \
+#--bedfile /home/pipelines/mutation_detector_nextflow/bedfile/CNV_Small_hg19_sortd \
+#--bedfile_exonwise /home/pipelines/mutation_detector_nextflow/bedfile/CNV_Small_hg19_sortd \
+#-profile docker -resume -bg
+#conda deactivate
+
