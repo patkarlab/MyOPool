@@ -19,7 +19,7 @@ include { SUBSAMPLE } from './modules/samtools/subsample/main.nf'
 // // FLT3 ITD detection
 include { FLT3_ITD_EXT } from './modules/flt3_itd_ext/flt3_itd_detect/main.nf'
 include { FILT3R } from './modules/filt3r/flt3_itd_detect/main.nf'
-include { ANNOVAR as ANNOVAR_FILT3R; ANNOVAR as ANNOVAR_SOMATICSEQ } from './modules/annovar/annotate/main.nf'
+include { ANNOVAR as ANNOVAR_FILT3R; ANNOVAR as ANNOVAR_SOMATICSEQ; ANNOVAR as ANNOVAR_PINDEL_FLT3; ANNOVAR as ANNOVAR_PINDEL_UBTF } from './modules/annovar/annotate/main.nf'
 include { FORMAT_FILT3R } from './modules/python/format_filt3r/main.nf'
 include { CHR13_BAM_GEN } from './modules/samtools/chr13_bam_gen/main.nf'
 include { BAM_TO_FASTQ } from './modules/bedtools/bamtofastq/main.nf'
@@ -30,8 +30,10 @@ include { HSMETRICS; HSMETRICS_COLLECT } from './modules/gatk/hsmetrics/main.nf'
 
 // // COVERAGE calculation
 include { COVERAGE } from './modules/bedtools/coverage/main.nf'
+include { PLOT_LOW_COVERAGE } from './modules/python/plot_low_coverage/main.nf'
 include { COVERVIEW } from './modules/coverview/coverage/main.nf'
 include { FORMAT_COVERVIEW } from './modules/python/format_coverview/main.nf'
+
 // include { COVERAGE; COVERVIEW; COVERAGE_WGS; COVERAGE_WGS_COLLECT } from './modules/coverage.nf'
 
 // // Variant calling
@@ -42,8 +44,8 @@ include { LOFREQ } from './modules/variant_call/lofreq/main.nf'
 include { MUTECT2 } from './modules/variant_call/mutect2/main.nf'
 include { VARDICT } from './modules/variant_call/vardict/main.nf'
 include { DEEPSOMATIC } from './modules/variant_call/deepsomatic/main.nf'
-//PINDEL PINDEL_UBTF
-
+include { PINDEL_FLT3 } from './modules/variant_call/pindel/pindel_flt3/main.nf'
+include { PINDEL_UBTF } from './modules/variant_call/pindel/pindel_ubtf/main.nf'
 
 // // Variant integration 
 include { SOMATICSEQ } from './modules/variant_integration/somaticseq/main.nf'
@@ -54,18 +56,25 @@ include { COMBINE_VARIANTS } from './modules/gatk/combinevariants/main.nf'
 // include { SOMATICSEQ; COMBINE_VARIANTS } from './modules/somaticseq.nf'
 
 // // CNV calling
+include { IFCNV } from './modules/cnv_call/ifcnv/main.nf'
+include { CNVKIT } from './modules/cnv_call/cnvkit/main.nf'
+include { PLOT_CNVKIT } from './modules/python/plot_cnvkit/main.nf'
+include { ANNOTSV } from './modules/cnv_call/annotsv/main.nf'
 // include { CNVKIT; ANNOT_SV; IFCNV } from './modules/cnv_call.nf'
 
 // // IGV reports
-// include { IGV_REPORTS } from './modules/igv_reports.nf'
+include { IGV_PREPROCESS } from './modules/annovar/igv_preprocess/main.nf'
+include { IGV_REPORTS } from './modules/igv_reports/main.nf'
 
 // // ichorCNA
 // include { ICHOR_CNA; OFFTARGET_BAM_GEN; ICHORCNA_OFFTARGET } from './modules/ichorCNA.nf'
 
 // // Format output
 include { CAVA } from './modules/cava/annotate/main.nf'
+include { FORMAT_PINDEL } from './modules/python/format_pindel/main.nf'
 include { FORMAT_SOMATICSEQ } from './modules/python/format_somaticseq/main.nf'
-// include {CAVA; FORMAT_SOMATICSEQ_COMBINED; FORMAT_CONCAT_SOMATICSEQ_COMBINED; FORMAT_PINDEL; FORMAT_PINDEL_UBTF; MERGE_CSV; FINAL_OUTPUT; UPDATE_FREQ; UPDATE_DB} from './modules/format_output.nf'
+include { FORMAT_ANNOTSV } from './modules/python/format_annotsv/main.nf'
+// include {MERGE_CSV; UPDATE_FREQ; UPDATE_DB} from './modules/format_output.nf'
 
 // // DND SCV
 // include { DNDSCV } from './modules/dnd_scv.nf'
@@ -78,6 +87,8 @@ genome_loc = file("${params.genome}", checkIfExists: true)
 index_files = file("${params.genome_dir}/${params.ind_files}.*")
 filt3r_reference = file("${params.filt3r_ref}", checkIfExists: true)
 filt3r = params.filt3r
+pindel_flt3 = params.pindel_flt3
+pindel_ubtf = params.pindel_ubtf
 somaticseq = params.somaticseq
 flt3_bedfile = file("${params.flt3_bedfile}", checkIfExists: true )
 coverview_config = file("${params.coverview_config}", checkIfExists: true )
@@ -95,6 +106,8 @@ ensembl_db = file("${params.ensembl_db}", checkIfExists: true)
 ensembl_db_index = file("${params.ensembl_db_index}", checkIfExists: true)
 known_SNPs_zip = file("${params.site2_zip}", checkIfExists: true)
 known_SNPs_tbi = file("${params.site2_zip_idx}", checkIfExists: true)
+cnvkitRef = file("${params.cnvkitRef}", checkIfExists: true)
+gene_scatter_list = file("${params.gene_scatter_list}", checkIfExists: true)
 
 workflow MYOPOOL {
 	leukemia = Channel
@@ -147,6 +160,7 @@ workflow MYOPOOL {
 
 	//// COVERAGE calculation
 	COVERAGE(ABRA_SORT.out.final_bam, bedfile, bedfile_exonwise, flt3_bedfile)
+	PLOT_LOW_COVERAGE(COVERAGE.out.counts)
 	COVERVIEW(ABRA_SORT.out.final_bam, bedfile_exonwise, coverview_config)
 	FORMAT_COVERVIEW(COVERVIEW.out)
 
@@ -163,10 +177,12 @@ workflow MYOPOOL {
 	MUTECT2(SUBSAMPLE.out, genome_loc, index_files, bedfile, known_SNPs, known_SNPs_index)
 	VARDICT(ABRA_SORT.out.final_bam, genome_loc, index_files, bedfile)
 	DEEPSOMATIC(ABRA_SORT.out.final_bam, control_bam, control_bamBai, genome_loc, index_files, bedfile)
-	//PINDEL(ABRA_BAM.out)
-	//PINDEL_UBTF(ABRA_BAM.out)
+	PINDEL_FLT3(ABRA_SORT.out.final_bam, genome_loc, index_files)
+	PINDEL_UBTF(ABRA_SORT.out.final_bam, genome_loc, index_files)
 
 	//// Variant integration 
+	ANNOVAR_PINDEL_FLT3(PINDEL_FLT3.out, pindel_flt3)
+	ANNOVAR_PINDEL_UBTF(PINDEL_UBTF.out, pindel_ubtf)
 	SOMATICSEQ(ABRA_SORT.out.final_bam.join(MUTECT2.out.join(VARDICT.out.join(DEEPSOMATIC.out.join(LOFREQ.out.join(STRELKA.out.join(FREEBAYES.out.join(PLATYPUS.out))))))), genome_loc, index_files, bedfile, dbsnp_somatic)
 	SOMATICSEQ_CONCAT(SOMATICSEQ.out)
 	ANNOVAR_SOMATICSEQ(SOMATICSEQ_CONCAT.out, somaticseq)
@@ -175,21 +191,21 @@ workflow MYOPOOL {
 	COMBINE_VARIANTS(MUTECT2.out.join(VARDICT.out.join(DEEPSOMATIC.out.join(LOFREQ.out.join(STRELKA.out.join(FREEBAYES.out.join(PLATYPUS.out)))))), genome_loc, index_files)
 
 	//// CNV calling
-	//CNVKIT(ABRA_BAM.out)
-	//ANNOT_SV(CNVKIT.out)
-	//IFCNV(ABRA_BAM.out.collect())
-
+	IFCNV(ABRA_SORT.out.final_bam, bedfile)
+	CNVKIT(ABRA_SORT.out.final_bam, cnvkitRef)
+	PLOT_CNVKIT(CNVKIT.out.cnvkit_files, gene_scatter_list)
+	ANNOTSV(CNVKIT.out.cnvkit_files)
+	
 	//// IGV reports
-	//IGV_REPORTS(SOMATICSEQ.out)
+	IGV_PREPROCESS(SOMATICSEQ_CONCAT.out)
+	IGV_REPORTS(ABRA_SORT.out.final_bam.join(IGV_PREPROCESS.out), genome_loc, index_files)
 
 	//// Format Output
 	CAVA(SOMATICSEQ_CONCAT.out.join(COMBINE_VARIANTS.out),cava_config, genome_loc, index_files, bedfile_zipped, known_SNPs_zip, known_SNPs_tbi, ensembl_db, ensembl_db_index)
+	FORMAT_PINDEL(ANNOVAR_PINDEL_FLT3.out.join(ANNOVAR_PINDEL_UBTF.out.join(COVERAGE.out.pindel_counts)))
 	FORMAT_SOMATICSEQ(ANNOVAR_SOMATICSEQ.out, artefacts)
-	//FORMAT_CONCAT_SOMATICSEQ_COMBINED(FORMAT_SOMATICSEQ_COMBINED.out)
-	//FORMAT_PINDEL(PINDEL.out.join(COVERAGE.out))
-	//FORMAT_PINDEL_UBTF(PINDEL_UBTF.out.join(COVERAGE.out))
-	//MERGE_CSV(FORMAT_CONCAT_SOMATICSEQ_COMBINED.out.join(CAVA.out.join(COVERVIEW.out.join(FORMAT_PINDEL.out.join(CNVKIT.out.join(SOMATICSEQ.out.join(FILT3R.out.join(FORMAT_PINDEL_UBTF.out.join(FLT3_ITD_EXT.out)))))))))	
-	//FINAL_OUTPUT(COVERAGE.out.join(CNVKIT.out))
+	FORMAT_ANNOTSV(ANNOTSV.out)
+	//MERGE_CSV(FORMAT_CONCAT_SOMATICSEQ_COMBINED.out.join(CAVA.out.join(COVERVIEW.out.join(FORMAT_PINDEL.out.join(CNVKIT.out.join(SOMATICSEQ.out.join(FILT3R.out.join(FORMAT_PINDEL_UBTF.out.join(FLT3_ITD_EXT.out)))))))))
 	//UPDATE_FREQ(MERGE_CSV.out.collect())
 	//UPDATE_DB(SOMATICSEQ.out.collect())
 

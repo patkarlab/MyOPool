@@ -2,11 +2,12 @@ process COVERAGE {
 	tag "${Sample}"
 	input:
 		tuple val (Sample), file(bam), file(bamBai)
-        path(bedfile)
-        path(bedfile_exonwise)
-        path(flt3_bedfile)
+		path(bedfile)
+		path(bedfile_exonwise)
+		path(flt3_bedfile)
 	output:
-		tuple val (Sample), file ("${Sample}.counts.bed"), file ("${Sample}_pindel_flt3.counts.bed"), file("${Sample}_pindel_ubtf.counts.bed")
+		tuple val (Sample), file ("${Sample}_pindel_flt3.counts.bed"), file("${Sample}_pindel_ubtf.counts.bed"), emit: pindel_counts
+		tuple val (Sample), file ("${Sample}.counts.bed"), emit: counts
 	script:
 	"""
 	bedtools coverage -counts -a ${bedfile_exonwise} -b ${bam} > ${Sample}.counts.bed

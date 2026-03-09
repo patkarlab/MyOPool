@@ -12,10 +12,10 @@ process CAVA {
 		path (ensembl_db)
 		path (ensembl_db_index)        
 	output:
-		tuple val(Sample)
+		val(Sample)
 	script:
 	"""
-	/cava-v1.0.0/cava.py -c ${cava_config} -i ${somaticseqVcf} -o ${Sample}.somaticseq
-	/cava-v1.0.0/cava.py -c ${cava_config} -i ${combinedVcf} -o ${Sample}.combined
+	cava.py -c ${cava_config} -i ${somaticseqVcf} -o ${Sample}.somaticseq
+	cava.py -c ${cava_config} -i ${combinedVcf} -o ${Sample}.combined
 	"""
 }
