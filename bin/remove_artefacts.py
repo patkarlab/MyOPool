@@ -21,30 +21,29 @@ blackList = [] #artefact list
 finalList = [] #without artefact final list
 
 with open(sys.argv[1], 'r') as variantFile:
-        for variant in variantFile:
-                #print(cline.rstrip())
-                list1 = [variant.rstrip().split(',')]
-                #print(clist)
+        variant_reader = csv.reader(variantFile)
+        for variant in variant_reader:
+                list1 = [variant]
                 counter = 0
                 with open(sys.argv[2], 'r') as artefactFile:
-                        for artefact in artefactFile:
-                                list2 = [artefact.rstrip().split(',')]
+                        artefact_reader = csv.reader(artefactFile)
+                        for artefact in artefact_reader:
+                                list2 = [artefact]
                                 if list1[0][0] == list2[0][0] and list1[0][1] == list2[0][1] and list1[0][4] == list2[0][3]:
                                         blackList.append(list1[0])
                                         counter = 1
-                                        #print("match")
                 if counter == 0:
                         finalList.append(list1[0])
 
 # writing lists to csv files
-with open(sys.argv[3], 'w', newline='') as outfile_final:
+with open(sys.argv[3], 'w') as outfile_final:
         writer = csv.writer(outfile_final)
-        writer.writerow(HEADER)      # added header
+        writer.writerow(HEADER)
         writer.writerows(finalList)
 
-with open(sys.argv[4], 'w', newline='') as outfile_artefacts:
+with open(sys.argv[4], 'w') as outfile_artefacts:
         writer = csv.writer(outfile_artefacts)
-        writer.writerow(HEADER)      # added header
+        writer.writerow(HEADER)
         writer.writerows(blackList)
 
 outfile_final.close()

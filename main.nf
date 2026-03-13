@@ -53,6 +53,7 @@ include { SOMATICSEQ_CONCAT } from './modules/bcftools/concat/main.nf'
 include { CANCERVAR_PREPROCESS } from './modules/python/cancervar_preprocess/main.nf'
 include { CANCERVAR_RUN } from './modules/cancervar/annotate/main.nf'
 include { COMBINE_VARIANTS } from './modules/gatk/combinevariants/main.nf'
+include { VEP } from './modules/vep/annotate/main.nf'
 // include { SOMATICSEQ; COMBINE_VARIANTS } from './modules/somaticseq.nf'
 
 // // CNV calling
@@ -74,6 +75,9 @@ include { CAVA } from './modules/cava/annotate/main.nf'
 include { FORMAT_PINDEL } from './modules/python/format_pindel/main.nf'
 include { FORMAT_SOMATICSEQ } from './modules/python/format_somaticseq/main.nf'
 include { FORMAT_ANNOTSV } from './modules/python/format_annotsv/main.nf'
+include { FORMAT_CAVA } from './modules/python/format_cava/main.nf'
+include { FORMAT_VEP_CANCERVAR } from './modules/python/format_vep_cancervar/main.nf'
+include { MERGE_CSV } from './modules/python/merge_csv/main.nf'
 // include {MERGE_CSV; UPDATE_FREQ; UPDATE_DB} from './modules/format_output.nf'
 
 // // DND SCV
@@ -108,6 +112,7 @@ known_SNPs_zip = file("${params.site2_zip}", checkIfExists: true)
 known_SNPs_tbi = file("${params.site2_zip_idx}", checkIfExists: true)
 cnvkitRef = file("${params.cnvkitRef}", checkIfExists: true)
 gene_scatter_list = file("${params.gene_scatter_list}", checkIfExists: true)
+pharma_input_xlxs = file("${params.pharma_input_xlxs}", checkIfExists: true)
 
 workflow MYOPOOL {
 	leukemia = Channel
@@ -201,10 +206,14 @@ workflow MYOPOOL {
 	IGV_REPORTS(ABRA_SORT.out.final_bam.join(IGV_PREPROCESS.out), genome_loc, index_files)
 
 	//// Format Output
+	VEP(SOMATICSEQ_CONCAT.out)
 	CAVA(SOMATICSEQ_CONCAT.out.join(COMBINE_VARIANTS.out),cava_config, genome_loc, index_files, bedfile_zipped, known_SNPs_zip, known_SNPs_tbi, ensembl_db, ensembl_db_index)
 	FORMAT_PINDEL(ANNOVAR_PINDEL_FLT3.out.join(ANNOVAR_PINDEL_UBTF.out.join(COVERAGE.out.pindel_counts)))
 	FORMAT_SOMATICSEQ(ANNOVAR_SOMATICSEQ.out, artefacts)
 	FORMAT_ANNOTSV(ANNOTSV.out)
+	FORMAT_CAVA(CAVA.out)
+	FORMAT_VEP_CANCERVAR(VEP.out.join(FORMAT_SOMATICSEQ.out.join(CANCERVAR_RUN.out)))
+	MERGE_CSV(FORMAT_SOMATICSEQ.out.join(FORMAT_VEP_CANCERVAR.out.join(FORMAT_CAVA.out.join(FORMAT_COVERVIEW.out.join(FORMAT_PINDEL.out.join(CNVKIT.out.cnvkit_files.join(FORMAT_FILT3R.out.join(FLT3_ITD_EXT.out))))))), pharma_input_xlxs)
 	//MERGE_CSV(FORMAT_CONCAT_SOMATICSEQ_COMBINED.out.join(CAVA.out.join(COVERVIEW.out.join(FORMAT_PINDEL.out.join(CNVKIT.out.join(SOMATICSEQ.out.join(FILT3R.out.join(FORMAT_PINDEL_UBTF.out.join(FLT3_ITD_EXT.out)))))))))
 	//UPDATE_FREQ(MERGE_CSV.out.collect())
 	//UPDATE_DB(SOMATICSEQ.out.collect())
