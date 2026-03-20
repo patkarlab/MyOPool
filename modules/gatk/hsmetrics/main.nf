@@ -22,7 +22,7 @@ process HSMETRICS {
 
 process HSMETRICS_COLLECT {
 	label 'process_low'
-	publishDir "${params.output}/", mode: 'copy'
+	publishDir "${params.outdir}/", mode: 'copy'
 	input:
 		file (ProbeWise) 
 		file (ExonWise)

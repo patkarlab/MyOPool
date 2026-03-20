@@ -1,6 +1,7 @@
 process SOMATICSEQ_CONCAT { 
 	tag "${Sample}"
 	label 'process_low'
+	publishDir "${params.outdir}/${Sample}/", mode: 'copy', pattern: '*.vcf'
 	input:
 		tuple val(Sample), file(somaticseq_snv_vcf), file(somaticseq_indel_vcf)
 	output:

@@ -9,23 +9,23 @@ import pandas as pd
 
 # Original xlsx file
 input_xlsx_file = sys.argv[1]
-csv_file = sys.argv[2]
-csv_file2 = sys.argv[3]
+#csv_file = sys.argv[2]
+#csv_file2 = sys.argv[3]
 #pcgr_tsv_file = sys.argv[3]
 #cpsr_tsv_file = sys.argv[4]
 
-wb = openpyxl.load_workbook(input_xlsx_file)
-if os.path.getsize(csv_file) != 0:
-	worksheet = wb.create_sheet('append_final_concat')
-	read_csv = csv.reader(open(csv_file, 'r', encoding='utf-8'), delimiter='\t')
-	for rows in read_csv:
-		worksheet.append(rows)
+#wb = openpyxl.load_workbook(input_xlsx_file)
+#if os.path.getsize(csv_file) != 0:
+#	worksheet = wb.create_sheet('append_final_concat')
+#	read_csv = csv.reader(open(csv_file, 'r', encoding='utf-8'), delimiter='\t')
+#	for rows in read_csv:
+#		worksheet.append(rows)
 
-if os.path.getsize(csv_file) != 0:
-    worksheet = wb.create_sheet('filt3r')
-    read_csv = csv.reader(open(csv_file2, 'r', encoding='utf-8'), delimiter=',')
-    for rows in read_csv:
-        worksheet.append(rows)
+#if os.path.getsize(csv_file) != 0:
+#   worksheet = wb.create_sheet('filt3r')
+#   read_csv = csv.reader(open(csv_file2, 'r', encoding='utf-8'), delimiter=',')
+#   for rows in read_csv:
+#       worksheet.append(rows)
 
 #if os.path.getsize(pcgr_tsv_file) != 0:
 #	worksheet = wb.create_sheet('pcgr')
@@ -39,7 +39,7 @@ if os.path.getsize(csv_file) != 0:
 #	for row2 in read_tsv2:
 #		worksheet.append(row2)
 
-wb.save(input_xlsx_file)
+#wb.save(input_xlsx_file)
 
 
 xl_file = pd.read_excel(input_xlsx_file, sheet_name=None)

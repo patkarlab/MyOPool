@@ -19,7 +19,7 @@ mkdir ${outdir}
   --mapWig /home/diagnostics/pipelines/ichorCNA-0.4.0/inst/extdata/map_hg19_1000kb.wig \
   --centromere /home/diagnostics/pipelines/ichorCNA-0.4.0/inst/extdata/GRCh37.p13_centromere_UCSC-gapTable.txt \
   --normalPanel /home/diagnostics/pipelines/ichorCNA-0.4.0/inst/extdata/HD_ULP_PoN_1Mb_median_normAutosome_mapScoreFiltered_median.rds \
-  --includeHOMD False --chrs "c(1:22, \"X\")" --chrTrain "c(1:22)" \
+  --includeHOMD False --chrTrain "c(1:22)" \
   --estimateNormal True --estimatePloidy True --estimateScPrevalence True \
   --scStates "c(1,3)" --txnE 0.9999 --txnStrength 10000 --outDir ${outdir}
 

@@ -4,10 +4,10 @@ process FORMAT_VEP_CANCERVAR {
 	input:
 		tuple val (Sample), file(vep_out), file (finalConcat), file (artefacts), file (cancervarMultianno)
 	output:
-		tuple val (Sample), file("${Sample}_cancervar.tsv")
+		tuple val (Sample), file("${Sample}.append_final_concat.tsv")
 	script:
 	"""
 	vep_extract.py ${finalConcat} ${vep_out} > ${Sample}.vep
-	cancervar_extract.py ${cancervarMultianno} ${Sample}.vep ${Sample}_cancervar.tsv
+	cancervar_extract.py ${cancervarMultianno} ${Sample}.vep ${Sample}.append_final_concat.tsv
 	"""
 }

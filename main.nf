@@ -9,34 +9,29 @@ BED file: ${params.bedfile}
 Sequences in:${params.sequences}
 """
 
-
-
+// FASTQ TO BAM
 include { FASTQTOBAM; FASTQTOBAM_WGS } from './workflows/fastq_to_bam.nf'
 include { ABRA_BAM } from './modules/abra/realign/main.nf'
 include { ABRA_SORT } from './modules/samtools/abra_sort/main.nf'
 include { SUBSAMPLE } from './modules/samtools/subsample/main.nf'
 
-// // FLT3 ITD detection
+// FLT3 ITD detection
 include { FLT3_ITD_EXT } from './modules/flt3_itd_ext/flt3_itd_detect/main.nf'
 include { FILT3R } from './modules/filt3r/flt3_itd_detect/main.nf'
-include { ANNOVAR as ANNOVAR_FILT3R; ANNOVAR as ANNOVAR_SOMATICSEQ; ANNOVAR as ANNOVAR_PINDEL_FLT3; ANNOVAR as ANNOVAR_PINDEL_UBTF } from './modules/annovar/annotate/main.nf'
-include { FORMAT_FILT3R } from './modules/python/format_filt3r/main.nf'
 include { CHR13_BAM_GEN } from './modules/samtools/chr13_bam_gen/main.nf'
 include { BAM_TO_FASTQ } from './modules/bedtools/bamtofastq/main.nf'
 include { GETITD } from './modules/getitd/flt3_itd_detect/main.nf'
 
-// // HSmetrics calculation
+// HSmetrics calculation
 include { HSMETRICS; HSMETRICS_COLLECT } from './modules/gatk/hsmetrics/main.nf'
 
-// // COVERAGE calculation
+// COVERAGE calculation
 include { COVERAGE } from './modules/bedtools/coverage/main.nf'
 include { PLOT_LOW_COVERAGE } from './modules/python/plot_low_coverage/main.nf'
 include { COVERVIEW } from './modules/coverview/coverage/main.nf'
-include { FORMAT_COVERVIEW } from './modules/python/format_coverview/main.nf'
+include { COVERAGE_WGS ; COVERAGE_WGS_COLLECT } from './modules/picard/coverage/main.nf'
 
-// include { COVERAGE; COVERVIEW; COVERAGE_WGS; COVERAGE_WGS_COLLECT } from './modules/coverage.nf'
-
-// // Variant calling
+// Variant calling
 include { PLATYPUS } from './modules/variant_call/platypus/main.nf'
 include { FREEBAYES } from './modules/variant_call/freebayes/main.nf'
 include { STRELKA } from './modules/variant_call/strelka/main.nf'
@@ -47,40 +42,47 @@ include { DEEPSOMATIC } from './modules/variant_call/deepsomatic/main.nf'
 include { PINDEL_FLT3 } from './modules/variant_call/pindel/pindel_flt3/main.nf'
 include { PINDEL_UBTF } from './modules/variant_call/pindel/pindel_ubtf/main.nf'
 
-// // Variant integration 
+// Variant integration 
 include { SOMATICSEQ } from './modules/variant_integration/somaticseq/main.nf'
 include { SOMATICSEQ_CONCAT } from './modules/bcftools/concat/main.nf'
-include { CANCERVAR_PREPROCESS } from './modules/python/cancervar_preprocess/main.nf'
-include { CANCERVAR_RUN } from './modules/cancervar/annotate/main.nf'
 include { COMBINE_VARIANTS } from './modules/gatk/combinevariants/main.nf'
-include { VEP } from './modules/vep/annotate/main.nf'
-// include { SOMATICSEQ; COMBINE_VARIANTS } from './modules/somaticseq.nf'
 
-// // CNV calling
+// CNV calling
 include { IFCNV } from './modules/cnv_call/ifcnv/main.nf'
 include { CNVKIT } from './modules/cnv_call/cnvkit/main.nf'
 include { PLOT_CNVKIT } from './modules/python/plot_cnvkit/main.nf'
-include { ANNOTSV } from './modules/cnv_call/annotsv/main.nf'
-// include { CNVKIT; ANNOT_SV; IFCNV } from './modules/cnv_call.nf'
 
-// // IGV reports
+// ichorCNA
+include { ICHORCNA } from './modules/cnv_call/ichorcna/main.nf'
+include { OFFTARGET_BAM_GEN } from './modules/bedtools/offtarget/main.nf'
+include { OFFTARGET_BAM_INDEX } from './modules/samtools/index/main.nf'
+include { ICHORCNA_OFFTARGET } from './modules/cnv_call/ichorcna_offtarget/main.nf'
+
+// Annotation
+include { ANNOVAR as ANNOVAR_FILT3R; ANNOVAR as ANNOVAR_SOMATICSEQ; ANNOVAR as ANNOVAR_PINDEL_FLT3; ANNOVAR as ANNOVAR_PINDEL_UBTF } from './modules/annovar/annotate/main.nf'
+include { VEP } from './modules/vep/annotate/main.nf'
+include { CANCERVAR_PREPROCESS } from './modules/python/cancervar_preprocess/main.nf'
+include { CANCERVAR_RUN } from './modules/cancervar/annotate/main.nf'
+include { ANNOTSV } from './modules/cnv_call/annotsv/main.nf'
+include { CAVA } from './modules/cava/annotate/main.nf'
+
+// IGV reports
 include { IGV_PREPROCESS } from './modules/annovar/igv_preprocess/main.nf'
 include { IGV_REPORTS } from './modules/igv_reports/main.nf'
 
-// // ichorCNA
-// include { ICHOR_CNA; OFFTARGET_BAM_GEN; ICHORCNA_OFFTARGET } from './modules/ichorCNA.nf'
-
-// // Format output
-include { CAVA } from './modules/cava/annotate/main.nf'
+// Format output
+include { FORMAT_FILT3R } from './modules/python/format_filt3r/main.nf'
+include { FORMAT_COVERVIEW } from './modules/python/format_coverview/main.nf'
 include { FORMAT_PINDEL } from './modules/python/format_pindel/main.nf'
 include { FORMAT_SOMATICSEQ } from './modules/python/format_somaticseq/main.nf'
 include { FORMAT_ANNOTSV } from './modules/python/format_annotsv/main.nf'
 include { FORMAT_CAVA } from './modules/python/format_cava/main.nf'
 include { FORMAT_VEP_CANCERVAR } from './modules/python/format_vep_cancervar/main.nf'
 include { MERGE_CSV } from './modules/python/merge_csv/main.nf'
-// include {MERGE_CSV; UPDATE_FREQ; UPDATE_DB} from './modules/format_output.nf'
+include { UPDATE_FREQ } from './modules/python/update_freq/main.nf'
+include { UPDATE_DB } from './modules/python/update_db/main.nf'
 
-// // DND SCV
+// DND SCV
 // include { DNDSCV } from './modules/dnd_scv.nf'
 
 
@@ -113,6 +115,9 @@ known_SNPs_tbi = file("${params.site2_zip_idx}", checkIfExists: true)
 cnvkitRef = file("${params.cnvkitRef}", checkIfExists: true)
 gene_scatter_list = file("${params.gene_scatter_list}", checkIfExists: true)
 pharma_input_xlxs = file("${params.pharma_input_xlxs}", checkIfExists: true)
+seqinfo_rds = file("${params.seqinfo_rds}", checkIfExists: true)
+alpdb = file("${params.alpdb}", checkIfExists: true)
+normal_wig = file("${params.normal_wig}", checkIfExists: true)
 
 workflow MYOPOOL {
 	leukemia = Channel
@@ -148,7 +153,7 @@ workflow MYOPOOL {
 	ABRA_SORT(myo_bam_ch.final_bams_ch.join(ABRA_BAM.out))
 	SUBSAMPLE(ABRA_SORT.out.final_bam)
 
-	//// FLT3 ITD detection
+	// FLT3 ITD detection
 	FILT3R(myo_bam_ch.trimmed_fastq, filt3r_reference)
 	ANNOVAR_FILT3R(FILT3R.out.filt3r_vcf, filt3r)
 	FORMAT_FILT3R(ANNOVAR_FILT3R.out.join(FILT3R.out.filt3r_json))
@@ -157,24 +162,24 @@ workflow MYOPOOL {
 	GETITD(BAM_TO_FASTQ.out)
 	FLT3_ITD_EXT(ABRA_SORT.out.final_bam)
 
-	//// HSmetrics calculation 
+	// HSmetrics calculation 
 	HSMETRICS(ABRA_SORT.out.final_bam, bedfile, bedfile_exonwise, genome_loc, index_files)
 	all_hsmetrics_pw = HSMETRICS.out.probewise.collect()
 	all_hsmetrics_ew = HSMETRICS.out.exonwise.collect()
 	HSMETRICS_COLLECT(all_hsmetrics_pw, all_hsmetrics_ew)
 
-	//// COVERAGE calculation
+	// COVERAGE calculation
 	COVERAGE(ABRA_SORT.out.final_bam, bedfile, bedfile_exonwise, flt3_bedfile)
 	PLOT_LOW_COVERAGE(COVERAGE.out.counts)
 	COVERVIEW(ABRA_SORT.out.final_bam, bedfile_exonwise, coverview_config)
 	FORMAT_COVERVIEW(COVERVIEW.out)
 
-	//// ichorCNA Offtarget
-	//OFFTARGET_BAM_GEN(ABRA_BAM.out)
-	//ICHORCNA_OFFTARGET(OFFTARGET_BAM_GEN.out)
+	// ichorCNA Offtarget
+	OFFTARGET_BAM_GEN(ABRA_SORT.out.final_bam, bedfile)
+	OFFTARGET_BAM_INDEX(OFFTARGET_BAM_GEN.out)
+	ICHORCNA_OFFTARGET(OFFTARGET_BAM_INDEX.out, bedfile, bedfile_exonwise, normal_wig, seqinfo_rds)
 
-
-	//// Variant calling 
+	// Variant calling 
 	PLATYPUS(ABRA_SORT.out.final_bam, genome_loc, index_files, bedfile)
 	FREEBAYES(ABRA_SORT.out.final_bam, genome_loc, index_files, bedfile)
 	STRELKA(ABRA_SORT.out.final_bam, genome_loc, index_files, bedfile, bedfile_zipped)
@@ -185,7 +190,7 @@ workflow MYOPOOL {
 	PINDEL_FLT3(ABRA_SORT.out.final_bam, genome_loc, index_files)
 	PINDEL_UBTF(ABRA_SORT.out.final_bam, genome_loc, index_files)
 
-	//// Variant integration 
+	// Variant integration 
 	ANNOVAR_PINDEL_FLT3(PINDEL_FLT3.out, pindel_flt3)
 	ANNOVAR_PINDEL_UBTF(PINDEL_UBTF.out, pindel_ubtf)
 	SOMATICSEQ(ABRA_SORT.out.final_bam.join(MUTECT2.out.join(VARDICT.out.join(DEEPSOMATIC.out.join(LOFREQ.out.join(STRELKA.out.join(FREEBAYES.out.join(PLATYPUS.out))))))), genome_loc, index_files, bedfile, dbsnp_somatic)
@@ -195,17 +200,17 @@ workflow MYOPOOL {
 	CANCERVAR_RUN(CANCERVAR_PREPROCESS.out)
 	COMBINE_VARIANTS(MUTECT2.out.join(VARDICT.out.join(DEEPSOMATIC.out.join(LOFREQ.out.join(STRELKA.out.join(FREEBAYES.out.join(PLATYPUS.out)))))), genome_loc, index_files)
 
-	//// CNV calling
+	// CNV calling
 	IFCNV(ABRA_SORT.out.final_bam, bedfile)
 	CNVKIT(ABRA_SORT.out.final_bam, cnvkitRef)
 	PLOT_CNVKIT(CNVKIT.out.cnvkit_files, gene_scatter_list)
 	ANNOTSV(CNVKIT.out.cnvkit_files)
 	
-	//// IGV reports
+	// IGV reports
 	IGV_PREPROCESS(SOMATICSEQ_CONCAT.out)
 	IGV_REPORTS(ABRA_SORT.out.final_bam.join(IGV_PREPROCESS.out), genome_loc, index_files)
 
-	//// Format Output
+	// Format Output
 	VEP(SOMATICSEQ_CONCAT.out)
 	CAVA(SOMATICSEQ_CONCAT.out.join(COMBINE_VARIANTS.out),cava_config, genome_loc, index_files, bedfile_zipped, known_SNPs_zip, known_SNPs_tbi, ensembl_db, ensembl_db_index)
 	FORMAT_PINDEL(ANNOVAR_PINDEL_FLT3.out.join(ANNOVAR_PINDEL_UBTF.out.join(COVERAGE.out.pindel_counts)))
@@ -214,20 +219,19 @@ workflow MYOPOOL {
 	FORMAT_CAVA(CAVA.out)
 	FORMAT_VEP_CANCERVAR(VEP.out.join(FORMAT_SOMATICSEQ.out.join(CANCERVAR_RUN.out)))
 	MERGE_CSV(FORMAT_SOMATICSEQ.out.join(FORMAT_VEP_CANCERVAR.out.join(FORMAT_CAVA.out.join(FORMAT_COVERVIEW.out.join(FORMAT_PINDEL.out.join(CNVKIT.out.cnvkit_files.join(FORMAT_FILT3R.out.join(FLT3_ITD_EXT.out))))))), pharma_input_xlxs)
-	//MERGE_CSV(FORMAT_CONCAT_SOMATICSEQ_COMBINED.out.join(CAVA.out.join(COVERVIEW.out.join(FORMAT_PINDEL.out.join(CNVKIT.out.join(SOMATICSEQ.out.join(FILT3R.out.join(FORMAT_PINDEL_UBTF.out.join(FLT3_ITD_EXT.out)))))))))
-	//UPDATE_FREQ(MERGE_CSV.out.collect())
-	//UPDATE_DB(SOMATICSEQ.out.collect())
+	UPDATE_DB(SOMATICSEQ_CONCAT.out.collect(), alpdb)
+	UPDATE_FREQ(MERGE_CSV.out.collect())
 
-	//// Adapter Trimming, alignment and GATK BQSR - WGS
+	// Adapter Trimming, alignment and GATK BQSR - WGS
 	wgs_bam_ch = FASTQTOBAM_WGS(wgs_ch)
 
-	//// Coverage calculation for WGS
-	//COVERAGE_WGS(wgs_bam_ch)
-	//all_coverages_wgs = COVERAGE_WGS.out.collect()
-	//COVERAGE_WGS_COLLECT(all_coverages_wgs)
+	// Coverage calculation for WGS
+	COVERAGE_WGS(wgs_bam_ch, genome_loc, index_files)
+	all_coverages_wgs = COVERAGE_WGS.out.collect()
+	COVERAGE_WGS_COLLECT(all_coverages_wgs)
 
-	//// ichorCNA
-	//ICHOR_CNA(wgs_bam_ch)
+	// ichorCNA
+	ICHORCNA(wgs_bam_ch, seqinfo_rds)
 
 }
 
