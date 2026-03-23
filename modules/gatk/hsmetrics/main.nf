@@ -34,14 +34,14 @@ process HSMETRICS_COLLECT {
 	echo -e "Sample name\tOn target\tOff target" > hsmetrics_probewise.txt
 	for i in ${ProbeWise}
 	do
-		samp_name=\$(basename -s .txt \${i})
+		samp_name=\$(basename -s _hsmetrics.txt \${i})
 		grep -v '#' \${i} | awk -v name=\${samp_name} 'BEGIN{FS="\t"; OFS="\t"}NR==3{ print name,\$7,\$8}' >> hsmetrics_probewise.txt
 	done
 
 	echo -e "Sample name\tOn target\tOff target" > hsmetrics_exonwise.txt
 	for i in ${ExonWise}
 	do
-		samp_name=\$(basename -s .txt \${i})
+		samp_name=\$(basename -s _hsmetrics_exonwise.txt \${i})
 		grep -v '#' \${i} | awk -v name=\${samp_name} 'BEGIN{FS="\t"; OFS="\t"}NR==3{ print name,\$7,\$8}' >> hsmetrics_exonwise.txt
 	done
 	"""
