@@ -5,13 +5,15 @@ process HSMETRICS {
 	publishDir "${params.output}/${Sample}/", mode: 'copy', pattern: '*_hsmetrics*.txt'
 	input:
 		tuple val(Sample), file(finalBam), file (finalBamBai), file (oldfinalBam), file (oldfinalBamBai)
+		path (intervals_probes_cnv)
+		path (intervals_exonwise)
 	output:
 		path ("${Sample}_hsmetrics.txt"), emit : genewise
 		path ("${Sample}_hsmetrics_exonwise.txt"), emit : exonwise
 	script:
 	"""
-	${params.java_path}/java -jar ${params.picard_path} CollectHsMetrics I= ${finalBam} O= ${Sample}_hsmetrics.txt BAIT_INTERVALS= ${params.bedfile}.interval_list TARGET_INTERVALS= ${params.bedfile}.interval_list R= ${params.genome} VALIDATION_STRINGENCY=LENIENT
-	${params.java_path}/java -jar ${params.picard_path} CollectHsMetrics I= ${finalBam} O= ${Sample}_hsmetrics_exonwise.txt BAIT_INTERVALS= ${params.bedfile_exonwise}.interval_list TARGET_INTERVALS= ${params.bedfile_exonwise}.interval_list R= ${params.genome} VALIDATION_STRINGENCY=LENIENT
+	${params.java_path}/java -jar ${params.picard_path} CollectHsMetrics I= ${finalBam} O= ${Sample}_hsmetrics.txt BAIT_INTERVALS= ${intervals_probes_cnv} TARGET_INTERVALS= ${intervals_probes_cnv} R= ${params.genome} VALIDATION_STRINGENCY=LENIENT
+	${params.java_path}/java -jar ${params.picard_path} CollectHsMetrics I= ${finalBam} O= ${Sample}_hsmetrics_exonwise.txt BAIT_INTERVALS= ${intervals_exonwise} TARGET_INTERVALS= ${intervals_exonwise} R= ${params.genome} VALIDATION_STRINGENCY=LENIENT
 	"""
 }
 

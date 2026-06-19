@@ -17,6 +17,7 @@
 ##for combined_panel:/home/pipelines/mutation_detector_nextflow/bedfile/Leukemia_Panel_Myeloid_2023_Feb_hg37_sortd
 ##for multiple_myeloma:/home/pipelines/mutation_detector_nextflow/bedfile/myeloma_combined_sortd
 
+modified_samplesheet=$1
 echo "WARNING : change the bedfile and the cnv reference"
 # for cnvkit reference 
 # 06112021_Leukemia_Panel_sorted.bed : "/home/pipelines/NextSeq_mutation_detector_leukemia/scripts/cnvkit_ref_GeneNames/Reference_labelled.cnn" 
@@ -70,17 +71,20 @@ source activate new_base
 nextflow -c /home/pipelines/NextSeq_mutation_detector_leukemia/nextflow.config run main.nf -entry MyoPool \
 --bedfile /home/pipelines/NextSeq_mutation_detector_leukemia/bedfiles/MYOPOOL_240125_UBTF_sortd \
 --bedfile_exonwise /home/pipelines/mutation_detector_nextflow/bedfile/MYOPOOL_231224_UBTF_exonwise_sortd \
---cnvkitRef /home/pipelines/NextSeq_mutation_detector_leukemia/scripts/cnvkit_myopool_lt_2x_ver2/Reference_combpanel.cnn \
---gene_scatter_list /home/pipelines/NextSeq_mutation_detector_leukemia/scripts/cnvkit_MyOPool_exonwise/ \
---gene_scatter /home/pipelines/MMpanel/scripts/gene_scatter \
+--bedfile_probes_cnv /home/pipelines/NextSeq_mutation_detector_leukemia/bedfiles/MYOPOOL_CNV_260515_sortd \
+--cnvkitRef /home/pipelines/NextSeq_mutation_detector_leukemia/scripts/cnvkit_cnv_small_hg19/Reference_combpanel.cnn \
+--gene_scatter_list /home/pipelines/NextSeq_mutation_detector_leukemia/scripts/cnvkit_cnv_small_hg19 \
+--input ${modified_samplesheet} \
 -profile docker -resume -bg
 conda deactivate
 
 # CNV Validation 20260304
 #source activate new_base
 #nextflow -c /home/pipelines/NextSeq_mutation_detector_leukemia/nextflow.config run main.nf -entry MyoPool \
-#--bedfile /home/pipelines/mutation_detector_nextflow/bedfile/CNV_Small_hg19_sortd \
-#--bedfile_exonwise /home/pipelines/mutation_detector_nextflow/bedfile/CNV_Small_hg19_sortd \
+#--bedfile /home/pipelines/NextSeq_mutation_detector_leukemia/bedfiles/CNV_Small_hg19_sortd \
+#--bedfile_probes_cnv /home/pipelines/NextSeq_mutation_detector_leukemia/bedfiles/MYOPOOL_CNV_260515_sortd \
+#--bedfile_exonwise /home/pipelines/mutation_detector_nextflow/bedfile/MYOPOOL_231224_UBTF_exonwise_sortd \
+#--cnvkitRef /home/pipelines/NextSeq_mutation_detector_leukemia/scripts/cnvkit_cnv_small_hg19/Reference_combpanel.cnn \
+#--gene_scatter_list /home/pipelines/NextSeq_mutation_detector_leukemia/scripts/cnvkit_cnv_small_hg19/ \
 #-profile docker -resume -bg
 #conda deactivate
-

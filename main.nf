@@ -7,7 +7,11 @@ STARTING PIPELINE
 Sample list: ${params.input}
 BED file: ${params.bedfile}.bed
 Sequences in:${params.sequences}
+
+
 """
+intervals_probes_cnv = file("${params.bedfile_probes_cnv}.interval_list", checkIfExists: true )
+intervals_exonwise = file("${params.bedfile_exonwise}.interval_list", checkIfExists: true )
 
 // Adapter Trimming, alignment and GATK BQSR (based on https://github.com/GavinHaLab/fastq_to_bam_paired_snakemake)
 include { FASTQTOBAM; FASTQTOBAM_WGS; ABRA_BAM } from './modules/processes.nf'
@@ -61,7 +65,7 @@ workflow MyoPool {
 			tuple(sample_full, sample_base, r1, r2)
 		}
 		.branch {
-			myopool: it[0].toLowerCase().contains("myopool") || it[0].toLowerCase().contains("screl") || it[0].toLowerCase().contains("cnv")
+			myopool: it[0].toLowerCase().contains("myopool") || it[0].toLowerCase().contains("mycnv") 
 			wgs:     it[0].contains("WGS")
 		}
 
@@ -80,7 +84,7 @@ workflow MyoPool {
 	FLT3_ITD_EXT(ABRA_BAM.out)
 
 	// HSmetrics calculation 
-	HSMETRICS(ABRA_BAM.out)
+	HSMETRICS(ABRA_BAM.out, intervals_probes_cnv, intervals_exonwise)
 	all_hsmetrics_gw = HSMETRICS.out.genewise.collect()
 	all_hsmetrics_pw = HSMETRICS.out.exonwise.collect()
 	HSMETRICS_COLLECT(all_hsmetrics_gw, all_hsmetrics_pw)

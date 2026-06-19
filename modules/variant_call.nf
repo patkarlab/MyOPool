@@ -63,7 +63,7 @@ process DEEPSOMATIC {
 	outpath=`realpath output`
 	bam_path=`realpath ${finalBam} | awk 'BEGIN{OFS=FS="/"} {\$NF=""; print \$0}'`
 	vcf_output=${Sample}_DS.vcf
-	control_bam_path=`realpath /home/programs/DeepSomatic/reads/OCIAML3.bam`
+	control_bam_path=`realpath /home/pipelines/NextSeq_mutation_detector_leukemia/scripts/ichorCNA/normal_bams/BNC2-CNVValMyOPoolV2.abra.bam`
 	echo \$bam_path \$outpath \$vcf_output ${finalBam} \${control_bam_path} ${params.genome} ${params.bedfile}.bed
 	${params.deepsomatic} \$bam_path \$outpath \$vcf_output ${finalBam} \${control_bam_path} ${params.genome} ${params.bedfile}.bed
 	"""
